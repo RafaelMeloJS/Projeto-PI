@@ -260,7 +260,7 @@ const VideoUpload = () => {
                 Voltar
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-gradient-primary">
               Upload de Vídeo
             </h1>
           </div>

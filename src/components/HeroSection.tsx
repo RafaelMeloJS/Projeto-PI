@@ -16,7 +16,7 @@ const HeroSection = () => {
       
       <div className="container mx-auto text-center relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gradient-primary leading-tight">
             Analise Sua Execução
             <br />
             <span className="text-4xl md:text-6xl">Com Inteligência Artificial</span>

@@ -13,7 +13,7 @@ const PlanComparison = () => {
             Planos
           </Badge>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
-            Compare o plano <span className="bg-gradient-primary bg-clip-text text-transparent">Gratuito x Premium</span>
+            Compare o plano <span className="text-gradient-primary">Gratuito x Premium</span>
           </h2>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
             Comece grátis, teste a plataforma e faça upgrade quando estiver pronto para acompanhar a evolução

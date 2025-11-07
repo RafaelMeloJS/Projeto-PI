@@ -86,7 +86,7 @@ const Checkout = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold mb-4 text-gradient-primary">
               Assine o Plano Premium
             </h1>
             <p className="text-muted-foreground">

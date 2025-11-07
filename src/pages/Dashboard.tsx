@@ -86,7 +86,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-gradient-primary">
                 Meu Dashboard
               </h1>
               <PremiumBadge />

@@ -173,7 +173,7 @@ const OperationPanel = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-gradient-primary">
                 Painel Operacional
               </h1>
               <p className="text-sm text-muted-foreground">

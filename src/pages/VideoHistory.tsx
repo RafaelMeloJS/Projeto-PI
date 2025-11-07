@@ -154,7 +154,7 @@ const getStatusIcon = (status: string, result: string) => {
                   Voltar
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-gradient-primary">
                 Histórico de Vídeos
               </h1>
             </div>

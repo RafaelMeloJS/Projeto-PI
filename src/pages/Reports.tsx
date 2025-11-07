@@ -90,7 +90,7 @@ const Reports = () => {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-gradient-primary">
                   Relatórios Premium
                 </h1>
                 <p className="text-sm text-muted-foreground">Análise detalhada da sua performance</p>

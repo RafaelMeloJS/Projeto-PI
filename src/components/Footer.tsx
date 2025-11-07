@@ -11,7 +11,7 @@ const Footer = () => {
               <div className="p-2 bg-gradient-primary rounded-lg shadow-glow">
                 <Dumbbell className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-gradient-primary">
                 Athlete Insights Pro
               </span>
             </div>

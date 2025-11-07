@@ -3,7 +3,7 @@ const DemoSection = () => {
     <section id="demo" className="py-20 px-6 bg-muted/30">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gradient-primary">
             Veja Como Funciona
           </h2>
           <p className="text-xl text-muted-foreground">

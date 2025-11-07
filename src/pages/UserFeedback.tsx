@@ -52,7 +52,7 @@ const UserFeedback = () => {
               <Heart className="h-10 w-10 text-primary-foreground" />
             </div>
             
-            <h2 className="text-2xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold mb-4 text-gradient-primary">
               Obrigado pelo Feedback!
             </h2>
             
@@ -84,7 +84,7 @@ const UserFeedback = () => {
                 Voltar
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-gradient-primary">
               Seu Feedback
             </h1>
           </div>
