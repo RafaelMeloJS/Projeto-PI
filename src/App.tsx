@@ -22,6 +22,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
 import AboutPage from "./pages/AboutPage";
+import Profile from "./pages/Profile";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,8 @@ const App = () => (
           <Route path="/feedback" element={<ProtectedRoute><UserFeedback /></ProtectedRoute>} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/relatorios" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+          <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/notificacoes" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/operacao" element={<ProtectedRoute><OperationRoute><OperationPanel /></OperationRoute></ProtectedRoute>} />
           <Route path="/blog" element={<NotFound />} />
           <Route path="/carreiras" element={<NotFound />} />

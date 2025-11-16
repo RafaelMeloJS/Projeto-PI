@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/enhanced-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -22,9 +22,23 @@ import {
 } from "lucide-react"
 
 const Dashboard = () => {
-
+  const navigate = useNavigate()
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "premium" | null>(null)
   const [isLoadingTier, setIsLoadingTier] = useState(true)
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut()
+      navigate("/")
+    } catch (err) {
+      console.error("Erro ao fazer logout:", err)
+      toast({
+        title: "Erro ao sair",
+        description: "Não foi possível fazer logout. Tente novamente.",
+        variant: "destructive",
+      })
+    }
+  }
 
   useEffect(() => {
     const loadTier = async () => {
@@ -93,14 +107,18 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <Bell className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <LogOut className="h-4 w-4" />
+              <Link to="/notificacoes">
+                <Button variant="ghost" size="sm">
+                  <Bell className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/perfil">
+                <Button variant="ghost" size="sm">
+                  <User className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-1" />
                 Sair
               </Button>
             </div>
