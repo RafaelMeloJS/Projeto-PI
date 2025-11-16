@@ -25,17 +25,17 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Produto</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/#features" className="hover:text-foreground transition-colors">Recursos</Link></li>
-              <li><Link to="/#pricing" className="hover:text-foreground transition-colors">Planos</Link></li>
-              <li><Link to="/#demo" className="hover:text-foreground transition-colors">Demonstração</Link></li>
-              <li><Link to="/#api" className="hover:text-foreground transition-colors">API</Link></li>
+              <li><Link to="/recursos" className="hover:text-foreground transition-colors">Recursos</Link></li>
+              <li><Link to="/planos" className="hover:text-foreground transition-colors">Planos</Link></li>
+              <li><Link to="/" className="hover:text-foreground transition-colors">Demonstração</Link></li>
+              <li><Link to="/" className="hover:text-foreground transition-colors">API</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Empresa</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/#about" className="hover:text-foreground transition-colors">Sobre Nós</Link></li>
+              <li><Link to="/sobre-nos" className="hover:text-foreground transition-colors">Sobre Nós</Link></li>
               <li><Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
               <li><Link to="/carreiras" className="hover:text-foreground transition-colors">Carreiras</Link></li>
               <li><Link to="/imprensa" className="hover:text-foreground transition-colors">Imprensa</Link></li>

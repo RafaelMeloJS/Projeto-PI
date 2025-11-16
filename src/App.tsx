@@ -19,6 +19,9 @@ import OperationRoute from "./components/OperationRoute";
 import NotFound from "./pages/NotFound";
 import PremiumRoute from "./components/PremiumRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FeaturesPage from "./pages/FeaturesPage";
+import PricingPage from "./pages/PricingPage";
+import AboutPage from "./pages/AboutPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +33,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/recursos" element={<FeaturesPage />} />
+          <Route path="/planos" element={<PricingPage />} />
+          <Route path="/sobre-nos" element={<AboutPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
