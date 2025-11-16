@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,15 +42,54 @@ import {
   Award,
   Zap,
   TrendingDown,
+  Lock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const Reports = () => {
   const [timePeriod, setTimePeriod] = useState("30");
   const [muscleFilter, setMuscleFilter] = useState("all");
   const [selectedExercise, setSelectedExercise] = useState("agachamento");
+  const [subscriptionTier, setSubscriptionTier] = useState<"free" | "premium" | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock data - será substituído por dados reais do Supabase
+  useEffect(() => {
+    const loadSubscription = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("subscription_tier")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) {
+          console.error("Erro ao buscar plano:", error);
+          setSubscriptionTier("free");
+        } else {
+          setSubscriptionTier((profile?.subscription_tier as "free" | "premium") || "free");
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Erro:", err);
+        setSubscriptionTier("free");
+        setIsLoading(false);
+      }
+    };
+
+    loadSubscription();
+  }, []);
+
+  // Mock data
   const userStats = {
     totalAnalyses: 127,
     correctExecutions: 98,
@@ -58,10 +97,10 @@ const Reports = () => {
     averageScore: 87,
     totalTimeAnalyzed: "4h 32min",
     currentStreak: 12,
-    subscriptionTier: "Premium",
+    subscriptionTier: subscriptionTier || "free",
     subscriptionRenewal: "15/12/2025",
     videosThisMonth: 18,
-    videoLimit: "Ilimitado",
+    videoLimit: subscriptionTier === "premium" ? "Ilimitado" : "3",
   };
 
   const performanceData = [
@@ -144,6 +183,33 @@ const Reports = () => {
     },
   ];
 
+  const isPremium = subscriptionTier === "premium";
+
+  const BlurredContent = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative">
+      {children}
+      {!isPremium && (
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background backdrop-blur-sm rounded-lg flex items-center justify-center cursor-not-allowed">
+          <div className="text-center">
+            <Lock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-medium text-muted-foreground">Desbloqueie o Plano Premium</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando relatórios...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -159,15 +225,17 @@ const Reports = () => {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gradient-primary">
-                  Relatórios Premium
+                  Relatórios {isPremium ? "Premium" : "Básicos"}
                 </h1>
-                <p className="text-sm text-muted-foreground">Análise completa da sua jornada fitness</p>
+                <p className="text-sm text-muted-foreground">
+                  {isPremium ? "Análise completa da sua jornada fitness" : "Visualização limitada - Faça upgrade para ver tudo"}
+                </p>
               </div>
             </div>
             
-            <Badge variant="secondary" className="bg-gradient-primary text-primary-foreground">
+            <Badge variant={isPremium ? "secondary" : "outline"} className={isPremium ? "bg-gradient-primary text-primary-foreground" : ""}>
               <Crown className="h-3 w-3 mr-1" />
-              Premium
+              {isPremium ? "Premium" : "Gratuito"}
             </Badge>
           </div>
         </div>
@@ -175,7 +243,7 @@ const Reports = () => {
 
       <div className="container mx-auto px-6 py-8">
         {/* Status do Plano */}
-        <Card className="mb-8 bg-gradient-to-br from-primary/10 via-accent/5 to-success/10 border-primary/20">
+        <Card className={`mb-8 ${isPremium ? "bg-gradient-to-br from-primary/10 via-accent/5 to-success/10 border-primary/20" : "bg-card/50 border-border/50"}`}>
           <CardHeader>
             <CardTitle className="flex items-center text-lg">
               <Crown className="mr-2 h-5 w-5 text-primary" />
@@ -186,23 +254,37 @@ const Reports = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <div className="text-sm text-muted-foreground mb-1">Plano Atual</div>
-                <div className="text-xl font-bold text-primary">{userStats.subscriptionTier}</div>
+                <div className="text-xl font-bold text-primary">{isPremium ? "Premium" : "Gratuito"}</div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground mb-1">Vídeos este Mês</div>
                 <div className="text-xl font-bold">{userStats.videosThisMonth} / {userStats.videoLimit}</div>
               </div>
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">Renovação</div>
-                <div className="text-xl font-bold">{userStats.subscriptionRenewal}</div>
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">Sequência Atual</div>
-                <div className="text-xl font-bold text-success flex items-center">
-                  <Zap className="h-5 w-5 mr-1" />
-                  {userStats.currentStreak} dias
+              {isPremium && (
+                <>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Renovação</div>
+                    <div className="text-xl font-bold">{userStats.subscriptionRenewal}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Sequência Atual</div>
+                    <div className="text-xl font-bold text-success flex items-center">
+                      <Zap className="h-5 w-5 mr-1" />
+                      {userStats.currentStreak} dias
+                    </div>
+                  </div>
+                </>
+              )}
+              {!isPremium && (
+                <div className="md:col-span-2">
+                  <Link to="/checkout">
+                    <Button variant="hero" className="w-full">
+                      <Crown className="h-4 w-4 mr-2" />
+                      Fazer Upgrade para Premium
+                    </Button>
+                  </Link>
                 </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -237,425 +319,132 @@ const Reports = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                <Award className="mr-2 h-4 w-4" />
-                Score Médio
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">{userStats.averageScore}%</div>
-              <Progress value={userStats.averageScore} className="h-2 mt-2" />
-            </CardContent>
-          </Card>
+          <BlurredContent>
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                  <Award className="mr-2 h-4 w-4" />
+                  Score Médio
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-primary">{userStats.averageScore}%</div>
+                <Progress value={userStats.averageScore} className="h-2 mt-2" />
+              </CardContent>
+            </Card>
+          </BlurredContent>
 
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                <Clock className="mr-2 h-4 w-4" />
-                Tempo Total
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-accent">{userStats.totalTimeAnalyzed}</div>
-              <p className="text-sm text-muted-foreground mt-1">De vídeos analisados</p>
-            </CardContent>
-          </Card>
+          <BlurredContent>
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                  <Clock className="mr-2 h-4 w-4" />
+                  Tempo Total
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-accent">{userStats.totalTimeAnalyzed}</div>
+                <p className="text-sm text-muted-foreground mt-1">De vídeos analisados</p>
+              </CardContent>
+            </Card>
+          </BlurredContent>
         </div>
 
-        {/* Filters */}
-        <Card className="mb-8 bg-card/50 backdrop-blur-sm border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <Filter className="mr-2 h-5 w-5 text-primary" />
-              Filtros Avançados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Período de Tempo</label>
-                <Select value={timePeriod} onValueChange={setTimePeriod}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">Última semana</SelectItem>
-                    <SelectItem value="30">Último mês</SelectItem>
-                    <SelectItem value="90">Últimos 3 meses</SelectItem>
-                    <SelectItem value="180">Últimos 6 meses</SelectItem>
-                    <SelectItem value="365">Último ano</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {/* Gráficos e Análises */}
+        <Tabs defaultValue="performance" className="mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="exercises">Exercícios</TabsTrigger>
+            <TabsTrigger value="recommendations">Recomendações</TabsTrigger>
+          </TabsList>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">Grupo Muscular</label>
-                <Select value={muscleFilter} onValueChange={setMuscleFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="perna">Perna</SelectItem>
-                    <SelectItem value="peito">Peito</SelectItem>
-                    <SelectItem value="costas">Costas</SelectItem>
-                    <SelectItem value="braco">Braço</SelectItem>
-                    <SelectItem value="ombro">Ombro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <TabsContent value="performance">
+            <BlurredContent>
+              <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                <CardHeader>
+                  <CardTitle>Evolução de Performance</CardTitle>
+                  <CardDescription>Taxa de sucesso ao longo dos meses</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={performanceData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
+                      <YAxis stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="taxa" stroke="hsl(var(--primary))" strokeWidth={2} name="Taxa de Sucesso %" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </BlurredContent>
+          </TabsContent>
 
-              <div className="flex items-end">
-                <Button variant="outline" className="w-full">
-                  <Download className="mr-2 h-4 w-4" />
-                  Exportar Relatório PDF
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Performance Timeline */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <TrendingUp className="mr-2 h-5 w-5 text-primary" />
-                Evolução Mensal
-              </CardTitle>
-              <CardDescription>
-                Taxa de execução correta por mês
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))"
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      domain={[0, 100]}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="taxa"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={3}
-                      dot={{ fill: "hsl(var(--primary))", r: 6 }}
-                      activeDot={{ r: 8 }}
-                      name="Taxa de Execução (%)"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="mr-2 h-5 w-5 text-accent" />
-                Distribuição de Exercícios
-              </CardTitle>
-              <CardDescription>
-                Exercícios mais praticados
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={exerciseFrequency}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {exerciseFrequency.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Top Exercises */}
-        <Card className="mb-8 bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Award className="mr-2 h-5 w-5 text-success" />
-              Exercícios Mais Executados
-            </CardTitle>
-            <CardDescription>
-              Ranking dos seus exercícios favoritos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {topExercises.map((exercise, index) => (
-                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center font-bold text-primary-foreground">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <div className="font-semibold">{exercise.name}</div>
-                      <div className="text-sm text-muted-foreground">{exercise.count} execuções</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">Score Médio</div>
-                      <div className="text-lg font-bold text-primary">{exercise.avgScore}%</div>
-                    </div>
-                    {exercise.trend === "up" && (
-                      <TrendingUp className="h-5 w-5 text-success" />
-                    )}
-                    {exercise.trend === "down" && (
-                      <TrendingDown className="h-5 w-5 text-destructive" />
-                    )}
-                    {exercise.trend === "stable" && (
-                      <div className="h-5 w-5 flex items-center justify-center">
-                        <div className="w-4 h-0.5 bg-muted-foreground"></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Exercise Analysis Tabs */}
-        <Card className="mb-8 bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart3 className="mr-2 h-5 w-5 text-accent" />
-              Análise Detalhada por Exercício
-            </CardTitle>
-            <CardDescription>
-              Pontos de melhoria e histórico de cada exercício
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={selectedExercise} onValueChange={setSelectedExercise}>
-              <TabsList className="grid grid-cols-4 mb-6">
-                {exerciseList.map((ex) => (
-                  <TabsTrigger key={ex.name} value={ex.name}>
-                    {ex.label}
-                    <Badge variant="secondary" className="ml-2 text-xs">{ex.videos}</Badge>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {exerciseList.map((ex) => (
-                <TabsContent key={ex.name} value={ex.name} className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Error Frequency Chart */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Pontos de Erro Mais Comuns</h3>
-                      <div className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={errorsByExercise}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                            <XAxis 
-                              dataKey="error" 
-                              stroke="hsl(var(--muted-foreground))"
-                              angle={-45}
-                              textAnchor="end"
-                              height={100}
-                              tick={{ fontSize: 12 }}
-                            />
-                            <YAxis stroke="hsl(var(--muted-foreground))" />
-                            <Tooltip 
-                              contentStyle={{
-                                backgroundColor: "hsl(var(--card))",
-                                border: "1px solid hsl(var(--border))",
-                                borderRadius: "8px",
-                              }}
-                            />
-                            <Bar 
-                              dataKey="frequency" 
-                              fill="hsl(var(--accent))" 
-                              radius={[8, 8, 0, 0]}
-                              name="Frequência (%)"
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-
-                    {/* Video List */}
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Últimas Análises ({ex.videos} total)</h3>
-                      <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
-                        {recentAnalysis.map((video) => (
-                          <div 
-                            key={video.id}
-                            className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
-                                {video.result === "Correto" ? (
-                                  <CheckCircle className="h-5 w-5 text-primary-foreground" />
-                                ) : (
-                                  <XCircle className="h-5 w-5 text-primary-foreground" />
-                                )}
-                              </div>
-                              <div>
-                                <div className="font-medium">{video.exercise}</div>
-                                <div className="text-xs text-muted-foreground">{video.date}</div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <Badge 
-                                variant={video.result === "Correto" ? "secondary" : "destructive"}
-                                className="mb-1"
-                              >
-                                {video.result}
-                              </Badge>
-                              <div className="text-sm font-semibold text-primary">{video.score}%</div>
-                            </div>
-                          </div>
+          <TabsContent value="exercises">
+            <BlurredContent>
+              <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                <CardHeader>
+                  <CardTitle>Distribuição de Exercícios</CardTitle>
+                  <CardDescription>Frequência de cada exercício</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={exerciseFrequency} cx="50%" cy="50%" labelLine={false} label={({ name, value }) => `${name}: ${value}%`} outerRadius={100} fill="#8884d8" dataKey="value">
+                        {exerciseFrequency.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </CardContent>
-        </Card>
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </BlurredContent>
+          </TabsContent>
 
-        {/* Muscle Balance */}
-        <Card className="mb-8 bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Target className="mr-2 h-5 w-5 text-success" />
-              Balanço Muscular
-            </CardTitle>
-            <CardDescription>
-              Distribuição do trabalho muscular nos últimos {timePeriod} dias
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-96">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={muscleBalanceData}>
-                  <PolarGrid stroke="hsl(var(--border))" />
-                  <PolarAngleAxis 
-                    dataKey="muscle" 
-                    stroke="hsl(var(--muted-foreground))"
-                    tick={{ fontSize: 12 }}
-                  />
-                  <PolarRadiusAxis 
-                    angle={90} 
-                    domain={[0, 100]}
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Radar
-                    name="Trabalho Muscular"
-                    dataKey="value"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary))"
-                    fillOpacity={0.6}
-                    strokeWidth={2}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-            
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-                <div className="text-sm text-muted-foreground mb-1">Mais Trabalhados</div>
-                <div className="font-semibold text-success">Quadríceps, Glúteos</div>
-              </div>
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                <div className="text-sm text-muted-foreground mb-1">Menos Trabalhados</div>
-                <div className="font-semibold text-destructive">Tríceps, Deltoides</div>
-              </div>
-              <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="text-sm text-muted-foreground mb-1">Equilíbrio Geral</div>
-                <div className="font-semibold text-primary">Bom (72%)</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recommendations */}
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Zap className="mr-2 h-5 w-5 text-accent" />
-              Recomendações Personalizadas
-            </CardTitle>
-            <CardDescription>
-              Sugestões baseadas na sua performance
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recommendations.map((rec, index) => (
-                <div 
-                  key={index} 
-                  className={`p-4 rounded-lg border ${
-                    rec.priority === "high" 
-                      ? "bg-destructive/10 border-destructive/30" 
-                      : "bg-primary/10 border-primary/30"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="font-semibold mb-1">{rec.title}</div>
-                      <div className="text-sm text-muted-foreground">{rec.description}</div>
+          <TabsContent value="recommendations">
+            <BlurredContent>
+              <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                <CardHeader>
+                  <CardTitle>Recomendações Personalizadas</CardTitle>
+                  <CardDescription>Dicas para melhorar seu desempenho</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {recommendations.map((rec, index) => (
+                    <div key={index} className={`p-4 rounded-lg border ${rec.priority === "high" ? "border-destructive/50 bg-destructive/10" : "border-border/50 bg-card/30"}`}>
+                      <h3 className="font-semibold mb-1">{rec.title}</h3>
+                      <p className="text-sm text-muted-foreground">{rec.description}</p>
                     </div>
-                    <Badge 
-                      variant={rec.priority === "high" ? "destructive" : "secondary"}
-                      className="ml-4"
-                    >
-                      {rec.priority === "high" ? "Alta" : "Média"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                  ))}
+                </CardContent>
+              </Card>
+            </BlurredContent>
+          </TabsContent>
+        </Tabs>
+
+        {!isPremium && (
+          <Card className="bg-gradient-to-r from-primary/20 to-accent/20 border-primary/50 mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center text-lg">
+                <Crown className="mr-2 h-5 w-5 text-primary" />
+                Desbloqueie Relatórios Completos
+              </CardTitle>
+              <CardDescription>
+                Acesse análises detalhadas, gráficos avançados e recomendações personalizadas com o Plano Premium
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/checkout">
+                <Button variant="hero" size="lg">
+                  <Crown className="h-4 w-4 mr-2" />
+                  Fazer Upgrade Agora - R$ 29/mês
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
