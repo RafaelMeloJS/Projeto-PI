@@ -33,15 +33,16 @@ const HeroSection = () => {
                 Começar Grátis Agora
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
-              size="xl" 
-              className="w-full sm:w-auto"
-              onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Ver Demonstração
-            </Button>
+            <Link to="/#demo">
+              <Button 
+                variant="outline" 
+                size="xl" 
+                className="w-full sm:w-auto"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Ver Demonstração
+              </Button>
+            </Link>
           </div>
 
           {/* Stats */}

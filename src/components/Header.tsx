@@ -19,36 +19,15 @@ const Header = () => {
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
-            <a 
-              href="#features" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
+            <Link to="/#features" className="text-muted-foreground hover:text-foreground transition-colors">
               Recursos
-            </a>
-            <a 
-              href="#pricing" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
+            </Link>
+            <Link to="/#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Planos
-            </a>
-            <a 
-              href="#about" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
+            </Link>
+            <Link to="/#about" className="text-muted-foreground hover:text-foreground transition-colors">
               Sobre Nós
-            </a>
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-3">

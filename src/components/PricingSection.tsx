@@ -105,15 +105,14 @@ const PricingSection = () => {
                   ))}
                 </div>
 
-                <a href={plan.name === "Premium" ? "/checkout" : "/signup"}>
-                  <Button 
+                <Button 
                     variant={plan.variant} 
                     size="lg" 
                     className="w-full"
+                    onClick={() => window.location.href = plan.name === "Premium" ? "/checkout" : "/signup"}
                   >
                     {plan.buttonText}
                   </Button>
-                </a>
               </CardContent>
             </Card>
           ))}

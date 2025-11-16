@@ -149,39 +149,39 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div>
-            <a href="/upload">
+            <Link to="/upload">
               <Button variant="hero" size="lg" className="h-20 flex-col space-y-2 w-full">
                 <Upload className="h-6 w-6" />
                 <span>Upload Vídeo</span>
               </Button>
-            </a>
+            </Link>
           </div>
           
           <div>
-            <a href="/videos">
+            <Link to="/videos">
               <Button variant="outline" size="lg" className="h-20 flex-col space-y-2 w-full">
                 <Video className="h-6 w-6" />
                 <span>Meus Vídeos</span>
               </Button>
-            </a>
+            </Link>
           </div>
           
           <div>
-            <a href="/relatorios">
+            <Link to="/relatorios">
               <Button variant="outline" size="lg" className="h-20 flex-col space-y-2 w-full">
                 <BarChart3 className="h-6 w-6" />
                 <span>Relatórios</span>
               </Button>
-            </a>
+            </Link>
           </div>
           
           <div>
-            <a href="/feedback">
+            <Link to="/feedback">
               <Button variant="outline" size="lg" className="h-20 flex-col space-y-2 w-full">
                 <MessageCircle className="h-6 w-6" />
                 <span>Suporte</span>
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -277,11 +277,11 @@ const Dashboard = () => {
                   <Video className="mr-2 h-5 w-5 text-primary" />
                   Vídeos Recentes
                 </div>
-                <a href="/videos">
+                <Link to="/videos">
                   <Button variant="ghost" size="sm">
                     Ver Todos
                   </Button>
-                </a>
+                </Link>
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -1,4 +1,5 @@
 import { Dumbbell, Instagram, Twitter, Youtube, Linkedin } from "lucide-react"
+import { Link } from "react-router-dom"
 
 const Footer = () => {
   return (
@@ -24,30 +25,30 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Produto</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-foreground transition-colors">Recursos</a></li>
-              <li><a href="#pricing" className="hover:text-foreground transition-colors">Planos</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Demonstração</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
+              <li><Link to="/#features" className="hover:text-foreground transition-colors">Recursos</Link></li>
+              <li><Link to="/#pricing" className="hover:text-foreground transition-colors">Planos</Link></li>
+              <li><Link to="/#demo" className="hover:text-foreground transition-colors">Demonstração</Link></li>
+              <li><Link to="/#api" className="hover:text-foreground transition-colors">API</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Empresa</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#about" className="hover:text-foreground transition-colors">Sobre Nós</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Carreiras</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Imprensa</a></li>
+              <li><Link to="/#about" className="hover:text-foreground transition-colors">Sobre Nós</Link></li>
+              <li><Link to="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link to="/carreiras" className="hover:text-foreground transition-colors">Carreiras</Link></li>
+              <li><Link to="/imprensa" className="hover:text-foreground transition-colors">Imprensa</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Suporte</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Centro de Ajuda</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Contato</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Política de Privacidade</a></li>
+              <li><Link to="/ajuda" className="hover:text-foreground transition-colors">Centro de Ajuda</Link></li>
+              <li><Link to="/contato" className="hover:text-foreground transition-colors">Contato</Link></li>
+              <li><Link to="/status" className="hover:text-foreground transition-colors">Status</Link></li>
+              <li><Link to="/privacidade" className="hover:text-foreground transition-colors">Política de Privacidade</Link></li>
             </ul>
           </div>
         </div>
