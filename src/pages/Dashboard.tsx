@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import PremiumBadge from "@/components/PremiumBadge"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 import { 
   Upload, 
   Video, 
@@ -23,6 +25,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "premium" | null>(null)
   const [isLoadingTier, setIsLoadingTier] = useState(true)
 
