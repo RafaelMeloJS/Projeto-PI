@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/enhanced-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Bell, CheckCircle, AlertCircle, Info, Trash2, MarkAsRead } from "lucide-react"
+import { ArrowLeft, Bell, CheckCircle, AlertCircle, Info, Trash2, Check } from "lucide-react"
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
@@ -164,14 +164,14 @@ const Notifications = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {!notification.read && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          title="Marcar como lido"
-                        >
-                          <MarkAsRead className="h-4 w-4" />
-                        </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleMarkAsRead(notification.id)}
+                        title="Marcar como lido"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
                       )}
                       <Button
                         variant="ghost"
