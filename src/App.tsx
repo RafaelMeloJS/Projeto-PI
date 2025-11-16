@@ -18,6 +18,7 @@ import OperationPanel from "./pages/OperationPanel";
 import OperationRoute from "./components/OperationRoute";
 import NotFound from "./pages/NotFound";
 import PremiumRoute from "./components/PremiumRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -32,13 +33,13 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/videos" element={<VideoHistory />} />
-          <Route path="/upload" element={<VideoUpload />} />
-          <Route path="/feedback" element={<UserFeedback />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/videos" element={<ProtectedRoute><VideoHistory /></ProtectedRoute>} />
+          <Route path="/upload" element={<ProtectedRoute><VideoUpload /></ProtectedRoute>} />
+          <Route path="/feedback" element={<ProtectedRoute><UserFeedback /></ProtectedRoute>} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/relatorios" element={<PremiumRoute><Reports /></PremiumRoute>} />
-          <Route path="/operacao" element={<OperationRoute><OperationPanel /></OperationRoute>} />
+          <Route path="/relatorios" element={<ProtectedRoute><PremiumRoute><Reports /></PremiumRoute></ProtectedRoute>} />
+          <Route path="/operacao" element={<ProtectedRoute><OperationRoute><OperationPanel /></OperationRoute></ProtectedRoute>} />
           <Route path="/blog" element={<NotFound />} />
           <Route path="/carreiras" element={<NotFound />} />
           <Route path="/imprensa" element={<NotFound />} />

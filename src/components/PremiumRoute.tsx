@@ -18,16 +18,6 @@ const PremiumRoute = ({ children }: PremiumRouteProps) => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session?.user) {
-          toast({
-            title: "Acesso negado",
-            description: "Você precisa estar logado para acessar esta página.",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
-        }
-
         setUser(session.user);
 
         const { data: profile, error } = await supabase
@@ -67,16 +57,7 @@ const PremiumRoute = ({ children }: PremiumRouteProps) => {
     checkPremiumAccess();
   }, [navigate]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Verificando acesso...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return <>{children}</>;
 };

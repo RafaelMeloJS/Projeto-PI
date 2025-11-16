@@ -18,16 +18,6 @@ const OperationRoute = ({ children }: OperationRouteProps) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (error || !session?.user) {
-          toast({
-            title: "Sessão expirada",
-            description: "Faça login para acessar o painel de operação.",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
-        }
-
         setUser(session.user);
 
         const { data: roles, error: rolesError } = await supabase
@@ -75,16 +65,7 @@ const OperationRoute = ({ children }: OperationRouteProps) => {
     checkAccess();
   }, [navigate]);
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Verificando permissão de operação...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return <>{children}</>;
 };
