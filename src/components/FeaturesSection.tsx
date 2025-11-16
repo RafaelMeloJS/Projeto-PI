@@ -41,10 +41,10 @@ const FeaturesSection = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gradient-primary">
-            Como Funciona Nossa Plataforma
+            Recursos Essenciais para o Seu Treino
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Tecnologia de ponta para transformar seus treinos em dados precisos e actionáveis
+            Transforme cada repetição em dados acionáveis com a inteligência da Athlete Insights Pro. Nossa plataforma combina **Análise de IA Avançada** com **Relatórios Detalhados** e **Velocidade de Processamento** para garantir que você treine com a máxima eficiência e segurança.
           </p>
         </div>
 

@@ -34,12 +34,10 @@ const AboutSection = () => {
           </h2>
           <div className="max-w-3xl mx-auto">
             <p className="text-xl text-muted-foreground mb-6">
-              Somos apaixonados por fitness e tecnologia. Nossa missão é democratizar o acesso a análises precisas de exercícios, 
-              ajudando pessoas de todos os níveis a treinar com segurança e eficiência.
+              A Athlete Insights Pro nasceu da paixão e do empenho de um grupo de estudantes com uma visão clara: **democratizar a análise de performance esportiva**. Nosso objetivo é fornecer uma ferramenta utilitária e de fácil acesso que ajude atletas, desde amadores até os de alta performance, a avaliar e aprimorar a execução de seus exercícios.
             </p>
             <p className="text-lg text-muted-foreground">
-              Nossa plataforma é um complemento ao trabalho de profissionais de educação física, 
-              não um substituto. Acreditamos que tecnologia e conhecimento humano juntos podem transformar vidas.
+              Com um foco intenso em utilidade e acessibilidade, dedicamos nosso esforço para entregar uma plataforma que combina a precisão da Inteligência Artificial com a praticidade do uso diário. Acreditamos que a tecnologia, quando bem aplicada, é a chave para transformar o treino em resultados concretos e seguros.
             </p>
           </div>
         </div>

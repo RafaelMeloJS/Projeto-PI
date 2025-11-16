@@ -98,10 +98,15 @@ const Checkout = () => {
             {/* Resumo do Plano */}
             <Card className="bg-card/50 backdrop-blur-sm border-primary/50 shadow-glow">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Star className="h-5 w-5 mr-2 text-primary" />
-                  Plano Premium
-                </CardTitle>
+                <div className="flex items-center justify-between mb-2">
+                  <CardTitle className="flex items-center">
+                    <Star className="h-5 w-5 mr-2 text-primary" />
+                    Plano Premium
+                  </CardTitle>
+                  <div className="bg-gradient-primary px-3 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-primary-foreground">Mais Popular</span>
+                  </div>
+                </div>
                 <CardDescription>Acesso completo a todos os recursos</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -109,34 +114,57 @@ const Checkout = () => {
                   <span className="text-4xl font-bold text-primary">R$ 29</span>
                   <span className="text-muted-foreground">/mês</span>
                 </div>
+                <p className="text-xs text-muted-foreground">Renovado automaticamente a cada mês. Cancele a qualquer momento.</p>
 
                 <div className="space-y-3 pt-4 border-t border-border">
-                  <div className="flex items-center text-sm">
-                    <Shield className="h-4 w-4 mr-2 text-success" />
-                    <span>Vídeos ilimitados</span>
+                  <div className="flex items-start text-sm">
+                    <Shield className="h-4 w-4 mr-2 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">Vídeos Ilimitados</div>
+                      <div className="text-xs text-muted-foreground">Envie quantos vídeos quiser</div>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm">
-                    <Shield className="h-4 w-4 mr-2 text-success" />
-                    <span>Análise detalhada completa</span>
+                  <div className="flex items-start text-sm">
+                    <Shield className="h-4 w-4 mr-2 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">Análise Detalhada Completa</div>
+                      <div className="text-xs text-muted-foreground">Feedback profissional em cada exercício</div>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm">
-                    <Shield className="h-4 w-4 mr-2 text-success" />
-                    <span>Dashboard de performance</span>
+                  <div className="flex items-start text-sm">
+                    <Shield className="h-4 w-4 mr-2 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">Dashboard de Performance</div>
+                      <div className="text-xs text-muted-foreground">Acompanhe sua evolução em tempo real</div>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm">
-                    <Shield className="h-4 w-4 mr-2 text-success" />
-                    <span>Relatórios semanais</span>
+                  <div className="flex items-start text-sm">
+                    <Shield className="h-4 w-4 mr-2 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">Relatórios Semanais</div>
+                      <div className="text-xs text-muted-foreground">Análise detalhada de progresso</div>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm">
-                    <Shield className="h-4 w-4 mr-2 text-success" />
-                    <span>Suporte prioritário</span>
+                  <div className="flex items-start text-sm">
+                    <Shield className="h-4 w-4 mr-2 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">Suporte Prioritário</div>
+                      <div className="text-xs text-muted-foreground">Atendimento em até 2 horas</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start text-sm">
+                    <Shield className="h-4 w-4 mr-2 text-success flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium">Análise de Múltiplos Ângulos</div>
+                      <div className="text-xs text-muted-foreground">Visualize cada movimento em detalhe</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border">
-                  <div className="flex items-center text-xs text-muted-foreground">
+                <div className="pt-4 border-t border-border bg-success/10 rounded-lg p-3">
+                  <div className="flex items-center text-xs text-success font-medium">
                     <Shield className="h-3 w-3 mr-1" />
-                    Pagamento seguro e criptografado
+                    Pagamento 100% seguro e criptografado
                   </div>
                 </div>
               </CardContent>
@@ -227,17 +255,17 @@ const Checkout = () => {
                     variant="hero"
                     size="lg"
                     className="w-full mt-6"
-                    disabled={isProcessing}
+                    disabled={isProcessing || !cardName || !cardNumber || !cardExpiry || !cardCvv}
                   >
                     {isProcessing ? (
                       <div className="flex items-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Processando...
+                        Processando Pagamento...
                       </div>
                     ) : (
                       <>
                         <CreditCard className="h-4 w-4 mr-2" />
-                        Confirmar Pagamento R$ 29,00
+                        Confirmar Pagamento - R$ 29,00
                       </>
                     )}
                   </Button>
