@@ -95,7 +95,7 @@ const Signup = () => {
           .insert({
             des_nome: data.fullName,
             des_email: data.email,
-            flg_tipo_pessoa: 'F', // F para pessoa física
+            flg_tipo_pessoa: 'F',
           })
           .select("id_pessoa")
           .single();
@@ -106,7 +106,7 @@ const Signup = () => {
           return;
         }
 
-        // 2. Inserir na dim_usuario (vinculando ao auth.user.id e id_pessoa)
+        // 2. Inserir na dim_usuario
         const { error: usuarioError } = await supabase
           .from("project.dim_usuario")
           .insert({
@@ -133,7 +133,7 @@ const Signup = () => {
           return;
         }
 
-        // 4. Inserir na public.profiles para compatibilidade e plano default (free)
+        // 4. Inserir na public.profiles
         const { error: profileError } = await supabase.from("public.profiles").insert({
           id: user_id,
           full_name: data.fullName,
@@ -144,56 +144,6 @@ const Signup = () => {
         if (profileError) {
           console.error("Error inserting into public.profiles:", profileError);
           toast({ variant: "destructive", title: "Erro ao inicializar plano", description: profileError.message });
-          return;
-        }
-      }
-        // 1. Inserir na dim_pessoa
-        const { data: pessoaData, error: pessoaError } = await supabase
-          .from("project.dim_pessoa")
-          .insert({
-            des_nome: data.fullName,
-            des_email: data.email,
-            flg_tipo_pessoa: 'F', // F para pessoa física
-          })
-          .select("id_pessoa")
-          .single();
-
-        if (pessoaError) {
-          console.error("Error inserting into dim_pessoa:", pessoaError);
-          toast({ variant: "destructive", title: "Erro ao criar perfil", description: pessoaError.message });
-          return;
-        }
-
-        // 2. Inserir na dim_usuario (vinculando ao auth.user.id e id_pessoa)
-        const { data: usuarioData, error: usuarioError } = await supabase
-          .from("project.dim_usuario")
-          .insert({
-            des_login: data.email,
-            des_senha: data.password, // ATENÇÃO: Senha não deve ser armazenada em texto plano!
-                                      // O campo des_senha na dim_usuario é um problema de segurança
-                                      // no schema do Supabase. O ideal é remover este campo.
-                                      // Por enquanto, vou inserir o email como login e deixar a senha em branco.
-            id_pessoa: pessoaData.id_pessoa,
-            user_uid: authData.user.id,
-          })
-          .select("id_usuario")
-          .single();
-
-        if (usuarioError) {
-          console.error("Error inserting into dim_usuario:", usuarioError);
-          toast({ variant: "destructive", title: "Erro ao criar usuário", description: usuarioError.message });
-          return;
-        }
-
-        // 3. Inserir na dim_cliente
-        const { error: clienteError } = await supabase.from("project.dim_cliente").insert({
-          id_pessoa: pessoaData.id_pessoa,
-          flg_atleta: 'T',
-        });
-
-        if (clienteError) {
-          console.error("Error inserting into dim_cliente:", clienteError);
-          toast({ variant: "destructive", title: "Erro ao criar cliente", description: clienteError.message });
           return;
         }
       }
@@ -371,29 +321,18 @@ const Signup = () => {
                   <Label htmlFor="preferences">Preferências</Label>
                   <Textarea
                     id="preferences"
-                    placeholder="Objetivos, exercícios preferidos, restrições..."
+                    placeholder="Quais são seus objetivos? (ex: hipertrofia, força, etc.)"
                     rows={3}
                     {...register("preferences")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bioimpedanceUrl" className="flex items-center gap-2">
-                    Link da Bioimpedância
-                    <a
-                      href="https://docs.lovable.dev"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:text-primary/80 transition-colors"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </Label>
+                  <Label htmlFor="bioimpedanceUrl">Link da Bioimpedância</Label>
                   <div className="relative">
-                    <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       id="bioimpedanceUrl"
-                      type="url"
                       placeholder="https://exemplo.com/bioimpedancia"
                       className="pl-10"
                       {...register("bioimpedanceUrl")}
@@ -402,9 +341,6 @@ const Signup = () => {
                   {errors.bioimpedanceUrl && (
                     <p className="text-sm text-destructive">{errors.bioimpedanceUrl.message}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Cole o link do seu relatório de bioimpedância para acompanhamento
-                  </p>
                 </div>
               </div>
             </div>
@@ -419,15 +355,15 @@ const Signup = () => {
                 "Criar Conta"
               )}
             </Button>
-          </form>
 
-          <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
+                <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Ou cadastre-se com</span>
+                <span className="bg-card px-2 text-muted-foreground">
+                  Ou continue com
+                </span>
               </div>
             </div>
 
