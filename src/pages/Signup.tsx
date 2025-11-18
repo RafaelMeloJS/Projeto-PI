@@ -152,7 +152,7 @@ const Signup = () => {
     } finally {
       setIsLoading(false);
     }
-
+  };
 
   const handleGoogleSignup = async () => {
     try {
