@@ -7,46 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
-  }
   public: {
     Tables: {
-      exercises: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          id: string
-          muscle_group: string
-          name: string
-          reference_video_url: string | null
-          technical_notes: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          muscle_group: string
-          name: string
-          reference_video_url?: string | null
-          technical_notes?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          muscle_group?: string
-          name?: string
-          reference_video_url?: string | null
-          technical_notes?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           bioimpedance_url: string | null
@@ -80,99 +42,142 @@ export type Database = {
         }
         Relationships: []
       }
-      user_roles: {
+      // Outras tabelas do schema 'public' que você possa ter
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      app_role: "admin" | "operacao" | "cliente"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  project: {
+    Tables: {
+      dim_pessoa: {
         Row: {
-          created_at: string | null
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
+          id_pessoa: number
+          des_nome: string
+          des_nome_social: string | null
+          dt_nascimento: string | null
+          des_estado_civil: string | null
+          des_email: string
+          des_nacionalidade: string | null
+          flg_tipo_pessoa: string
+          num_telefone: string | null
+          obs_pessoa: string | null
         }
         Insert: {
-          created_at?: string | null
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
+          des_nome: string
+          des_nome_social?: string | null
+          dt_nascimento?: string | null
+          des_estado_civil?: string | null
+          des_email: string
+          des_nacionalidade?: string | null
+          flg_tipo_pessoa: string
+          num_telefone?: string | null
+          obs_pessoa?: string | null
         }
         Update: {
-          created_at?: string | null
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
+          des_nome?: string
+          des_nome_social?: string | null
+          dt_nascimento?: string | null
+          des_estado_civil?: string | null
+          des_email?: string
+          des_nacionalidade?: string | null
+          flg_tipo_pessoa?: string
+          num_telefone?: string | null
+          obs_pessoa?: string | null
         }
         Relationships: []
       }
-      video_analyses: {
+      dim_cliente: {
         Row: {
-          analysis_result: Json | null
-          created_at: string | null
-          execution_status: string | null
-          exercise_name: string
-          feedback_text: string | null
-          id: string
-          user_id: string
-          video_url: string | null
+          id_cliente: number
+          id_pessoa: number
+          des_categoria: string | null
+          id_esporte: number | null
+          id_clube: number | null
+          flg_atleta: string | null
+          dt_inicio_contrato: string | null
+          dt_fim_contrato: string | null
         }
         Insert: {
-          analysis_result?: Json | null
-          created_at?: string | null
-          execution_status?: string | null
-          exercise_name: string
-          feedback_text?: string | null
-          id?: string
-          user_id: string
-          video_url?: string | null
+          id_pessoa: number
+          des_categoria?: string | null
+          id_esporte?: number | null
+          id_clube?: number | null
+          flg_atleta?: string | null
+          dt_inicio_contrato?: string | null
+          dt_fim_contrato?: string | null
         }
         Update: {
-          analysis_result?: Json | null
-          created_at?: string | null
-          execution_status?: string | null
-          exercise_name?: string
-          feedback_text?: string | null
-          id?: string
-          user_id?: string
-          video_url?: string | null
+          id_pessoa?: number
+          des_categoria?: string | null
+          id_esporte?: number | null
+          id_clube?: number | null
+          flg_atleta?: string | null
+          dt_inicio_contrato?: string | null
+          dt_fim_contrato?: string | null
         }
         Relationships: []
       }
-      video_analysis: {
+      // Adicionar outras tabelas do schema 'project' conforme necessário
+      dim_plano: {
         Row: {
-          classification: string | null
-          created_at: string | null
-          exercise_type: string
-          feedback: string | null
-          id: string
-          processed_at: string | null
-          score: number | null
-          status: string
-          updated_at: string | null
-          user_id: string
-          video_id: string
+          id_plano: number
+          des_plano: string
+          vlr_plano: number
+          des_detalhe: string | null
         }
         Insert: {
-          classification?: string | null
-          created_at?: string | null
-          exercise_type: string
-          feedback?: string | null
-          id?: string
-          processed_at?: string | null
-          score?: number | null
-          status?: string
-          updated_at?: string | null
-          user_id: string
-          video_id: string
+          des_plano: string
+          vlr_plano: number
+          des_detalhe?: string | null
         }
         Update: {
-          classification?: string | null
-          created_at?: string | null
-          exercise_type?: string
-          feedback?: string | null
-          id?: string
-          processed_at?: string | null
-          score?: number | null
-          status?: string
-          updated_at?: string | null
-          user_id?: string
-          video_id?: string
+          des_plano?: string
+          vlr_plano?: number
+          des_detalhe?: string | null
+        }
+        Relationships: []
+      }
+      fato_venda: {
+        Row: {
+          id_venda: number
+          qtd_pedido: number
+          num_parcelas: string
+          id_usuario: number
+          id_plano: number
+          id_tipo_pagamento: number
+          id_forma_pagamento: number
+          id_logradouro: number
+          id_dim_venda: number
+        }
+        Insert: {
+          qtd_pedido: number
+          num_parcelas: string
+          id_usuario: number
+          id_plano: number
+          id_tipo_pagamento: number
+          id_forma_pagamento: number
+          id_logradouro: number
+          id_dim_venda: number
+        }
+        Update: {
+          qtd_pedido?: number
+          num_parcelas?: string
+          id_usuario?: number
+          id_plano?: number
+          id_tipo_pagamento?: number
+          id_forma_pagamento?: number
+          id_logradouro?: number
+          id_dim_venda?: number
         }
         Relationships: []
       }
@@ -181,16 +186,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "operacao" | "cliente"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never

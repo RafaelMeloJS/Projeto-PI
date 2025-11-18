@@ -54,7 +54,7 @@ const Dashboard = () => {
         }
 
         const { data: profile, error: profileError } = await supabase
-          .from("profiles")
+          .from("public.profiles")
           .select("subscription_tier")
           .eq("id", session.user.id)
           .single()

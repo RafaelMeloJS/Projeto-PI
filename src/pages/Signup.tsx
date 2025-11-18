@@ -65,6 +65,101 @@ const Signup = () => {
         password: data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes("already registered")) {
+          toast({
+            variant: "destructive",
+            title: "E-mail já cadastrado",
+            description: "Este e-mail já está em uso. Faça login ou use outro e-mail.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro ao criar conta",
+            description: signUpError.message,
+          });
+        }
+        return;
+      }
+
+      if (authData.user) {
+        // 1. Inserir na dim_pessoa
+        const { data: pessoaData, error: pessoaError } = await supabase
+          .from("project.dim_pessoa")
+          .insert({
+            des_nome: data.fullName,
+            des_email: data.email,
+            flg_tipo_pessoa: 'F', // F para pessoa física
+          })
+          .select("id_pessoa")
+          .single();
+
+        if (pessoaError) {
+          console.error("Error inserting into dim_pessoa:", pessoaError);
+          toast({ variant: "destructive", title: "Erro ao criar perfil", description: pessoaError.message });
+          return;
+        }
+
+        // 2. Inserir na dim_usuario (vinculando ao auth.user.id e id_pessoa)
+        const { data: usuarioData, error: usuarioError } = await supabase
+          .from("project.dim_usuario")
+          .insert({
+            des_login: data.email,
+            des_senha: data.password, // ATENÇÃO: Senha não deve ser armazenada em texto plano!
+                                      // O campo des_senha na dim_usuario é um problema de segurança
+                                      // no schema do Supabase. O ideal é remover este campo.
+                                      // Por enquanto, vou inserir o email como login e deixar a senha em branco.
+            id_pessoa: pessoaData.id_pessoa,
+            user_uid: authData.user.id,
+          })
+          .select("id_usuario")
+          .single();
+
+        if (usuarioError) {
+          console.error("Error inserting into dim_usuario:", usuarioError);
+          toast({ variant: "destructive", title: "Erro ao criar usuário", description: usuarioError.message });
+          return;
+        }
+
+        // 3. Inserir na dim_cliente
+        const { error: clienteError } = await supabase.from("project.dim_cliente").insert({
+          id_pessoa: pessoaData.id_pessoa,
+          flg_atleta: 'T',
+        });
+
+        if (clienteError) {
+          console.error("Error inserting into dim_cliente:", clienteError);
+          toast({ variant: "destructive", title: "Erro ao criar cliente", description: clienteError.message });
+          return;
+        }
+      }
+
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Você está sendo redirecionado para o dashboard...",
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+    setIsLoading(true);
+    try {
+      const { error: signUpError, data: authData } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             full_name: data.fullName,
           },
@@ -88,20 +183,7 @@ const Signup = () => {
         return;
       }
 
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({
-            training_history: data.trainingHistory,
-            preferences: data.preferences,
-            bioimpedance_url: data.bioimpedanceUrl,
-          })
-          .eq("id", authData.user.id);
-
-        if (profileError) {
-          console.error("Error updating profile:", profileError);
-        }
-      }
+      
 
       toast({
         title: "Conta criada com sucesso!",

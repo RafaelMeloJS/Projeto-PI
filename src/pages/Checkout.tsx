@@ -36,9 +36,44 @@ const Checkout = () => {
       // Simular processamento de pagamento
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Atualizar perfil para premium
-      const { error } = await supabase
-        .from("profiles")
+      // ID do Plano Premium (Mockado para o exemplo)
+      // Em um cenário real, você buscaria o ID do plano na tabela dim_plano
+      const ID_PLANO_PREMIUM = 1; 
+      const ID_TIPO_PAGAMENTO_CARTAO = 1; // Mock
+      const ID_FORMA_PAGAMENTO_CREDITO = 1; // Mock
+      const ID_LOGRADOURO_MOCK = 1; // Mock
+      const ID_DIM_VENDA_MOCK = 1; // Mock
+
+      // 1. Buscar o id_usuario
+      const { data: usuarioData, error: usuarioError } = await supabase
+        .from("project.dim_usuario")
+        .select("id_usuario")
+        .eq("user_uid", user.id)
+        .single();
+
+      if (usuarioError) throw usuarioError;
+
+      const idUsuario = usuarioData.id_usuario;
+
+      // 2. Inserir na fato_venda (simulando a transação)
+      const { error: vendaError } = await supabase
+        .from("project.fato_venda")
+        .insert({
+          qtd_pedido: 1,
+          num_parcelas: '1x', // Simulação de pagamento à vista
+          id_usuario: idUsuario, 
+          id_plano: ID_PLANO_PREMIUM,
+          id_tipo_pagamento: ID_TIPO_PAGAMENTO_CARTAO,
+          id_forma_pagamento: ID_FORMA_PAGAMENTO_CREDITO,
+          id_logradouro: ID_LOGRADOURO_MOCK,
+          id_dim_venda: ID_DIM_VENDA_MOCK,
+        });
+
+      if (vendaError) throw vendaError;
+
+      // 2. Atualizar o perfil para refletir o status da assinatura (mantendo a lógica original do site para não quebrar o Dashboard)
+      const { error: profileError } = await supabase
+        .from("public.profiles")
         .update({
           subscription_tier: "premium",
           subscription_status: "active",
@@ -47,7 +82,7 @@ const Checkout = () => {
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       toast({
         title: "Pagamento aprovado! 🎉",
