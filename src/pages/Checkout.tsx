@@ -46,7 +46,7 @@ const Checkout = () => {
 
       // 1. Buscar o id_usuario
       const { data: usuarioData, error: usuarioError } = await supabase
-        .from("public.dim_usuario")
+        .from("project.dim_usuario")
         .select("id_usuario")
         .eq("user_uid", user.id)
         .single();
@@ -57,7 +57,7 @@ const Checkout = () => {
 
       // 2. Inserir na fato_venda (simulando a transação)
       const { error: vendaError } = await supabase
-        .from("public.fato_venda")
+        .from("project.fato_venda")
         .insert({
           qtd_pedido: 1,
           num_parcelas: '1x', // Simulação de pagamento à vista

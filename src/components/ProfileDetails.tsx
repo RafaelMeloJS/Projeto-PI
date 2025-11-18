@@ -47,7 +47,7 @@ const ProfileDetails = () => {
 
         // 1. Buscar id_usuario e id_pessoa
         const { data: usuarioData, error: usuarioError } = await supabase
-          .from("public.dim_usuario")
+          .from("project.dim_usuario")
           .select("id_usuario, id_pessoa")
           .eq("user_uid", user.id)
           .single();
@@ -62,14 +62,14 @@ const ProfileDetails = () => {
 
         // 2. Buscar dados da dim_pessoa
         const { data: pessoaData, error: pessoaError } = await supabase
-          .from("public.dim_pessoa")
+          .from("project.dim_pessoa")
           .select("dt_nascimento, num_telefone")
           .eq("id_pessoa", usuarioData.id_pessoa)
           .single();
 
         // 3. Buscar dados de logradouro (se existir)
         const { data: logradouroData, error: logradouroError } = await supabase
-          .from("public.dim_logradouro")
+          .from("project.dim_logradouro")
           .select("id_logradouro, des_logradouro, num_cep, des_cidade, des_estado, des_pais")
           .eq("id_pessoa", usuarioData.id_pessoa)
           .maybeSingle();
@@ -113,7 +113,7 @@ const ProfileDetails = () => {
 
       // 1. Atualizar dim_pessoa
       const { error: pessoaError } = await supabase
-        .from("public.dim_pessoa")
+        .from("project.dim_pessoa")
         .update({
           dt_nascimento: data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : null,
           num_telefone: data.phone || null,
@@ -136,7 +136,7 @@ const ProfileDetails = () => {
       if (idLogradouro) {
         // Atualizar
         const { error: logradouroError } = await supabase
-          .from("public.dim_logradouro")
+          .from("project.dim_logradouro")
           .update(logradouroPayload)
           .eq("id_logradouro", idLogradouro);
         
@@ -144,7 +144,7 @@ const ProfileDetails = () => {
       } else {
         // Inserir
         const { data: newLogradouro, error: logradouroError } = await supabase
-          .from("public.dim_logradouro")
+          .from("project.dim_logradouro")
           .insert(logradouroPayload)
           .select("id_logradouro")
           .single();

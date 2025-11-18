@@ -91,7 +91,7 @@ const Signup = () => {
 
         // 1. Inserir na dim_pessoa
         const { data: pessoaData, error: pessoaError } = await supabase
-          .from("public.dim_pessoa")
+          .from("project.dim_pessoa")
           .insert({
             des_nome: data.fullName,
             des_email: data.email,
@@ -108,7 +108,7 @@ const Signup = () => {
 
         // 2. Inserir na dim_usuario
         const { error: usuarioError } = await supabase
-          .from("public.dim_usuario")
+          .from("project.dim_usuario")
           .insert({
             des_login: data.email,
             id_pessoa: pessoaData.id_pessoa,
@@ -122,7 +122,7 @@ const Signup = () => {
         }
 
         // 3. Inserir na dim_cliente
-        const { error: clienteError } = await supabase.from("public.dim_cliente").insert({
+        const { error: clienteError } = await supabase.from("project.dim_cliente").insert({
           id_pessoa: pessoaData.id_pessoa,
           flg_atleta: 'T',
         });
