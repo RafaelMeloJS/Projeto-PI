@@ -1,31 +1,21 @@
 import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/enhanced-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, User, Edit2, Save, X } from "lucide-react"
+import { ArrowLeft, Mail, User } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
-import { toast } from "@/hooks/use-toast"
+import ProfileDetails from "@/components/ProfileDetails" // Importando o novo componente
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState("")
-  
   const [profileData, setProfileData] = useState({
-    fullName: "João Silva Santos",
-    email: "joao.silva@example.com",
-    phone: "+55 11 98765-4321",
-    birthDate: "1995-05-15",
-    city: "São Paulo",
-    state: "SP",
-    bio: "Atleta amador apaixonado por musculação e fitness",
-    subscriptionTier: "premium",
-    joinDate: "2024-01-15",
+    fullName: "Carregando...",
+    email: "carregando...",
+    subscriptionTier: "free",
+    joinDate: "2024-01-01",
   })
-
-  const [editData, setEditData] = useState(profileData)
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -33,24 +23,33 @@ const Profile = () => {
         const { data: { session } } = await supabase.auth.getSession()
         
         if (session?.user) {
-          setUserEmail(session.user.email || "")
-          
-          // Buscar dados do perfil do Supabase (quando implementado)
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
+          // 1. Buscar dados da dim_pessoa para nome e email
+          const { data: usuarioData } = await supabase
+            .from("project.dim_usuario")
+            .select("id_pessoa")
+            .eq("user_uid", session.user.id)
             .single()
 
-          if (profile) {
+          if (usuarioData) {
+            const { data: pessoaData } = await supabase
+              .from("project.dim_pessoa")
+              .select("des_nome")
+              .eq("id_pessoa", usuarioData.id_pessoa)
+              .single()
+
+            // 2. Buscar dados do perfil (profiles) para o plano (mantendo a compatibilidade)
+            const { data: profile } = await supabase
+              .from("public.profiles")
+              .select("subscription_tier, created_at")
+              .eq("id", session.user.id)
+              .single()
+
             setProfileData(prev => ({
               ...prev,
-              email: session.user.email || prev.email,
-              // Adicionar campos do Supabase conforme implementado
-            }))
-            setEditData(prev => ({
-              ...prev,
-              email: session.user.email || prev.email,
+              fullName: pessoaData?.des_nome || "Nome não encontrado",
+              email: session.user.email || "Email não encontrado",
+              subscriptionTier: (profile?.subscription_tier as "premium" | "free") || "free",
+              joinDate: profile?.created_at || "2024-01-01",
             }))
           }
         }
@@ -63,42 +62,6 @@ const Profile = () => {
 
     loadUserData()
   }, [])
-
-  const handleSaveProfile = async () => {
-    setIsSaving(true)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session?.user) {
-        throw new Error("Usuário não autenticado")
-      }
-
-      // Atualizar perfil no Supabase (quando implementado)
-      // Por enquanto, apenas salvar localmente
-      setProfileData(editData)
-      setIsEditing(false)
-      
-      toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram salvas com sucesso.",
-        variant: "default",
-      })
-    } catch (err) {
-      console.error("Erro ao salvar perfil:", err)
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível atualizar seu perfil. Tente novamente.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleCancel = () => {
-    setEditData(profileData)
-    setIsEditing(false)
-  }
 
   if (isLoading) {
     return (
@@ -131,13 +94,6 @@ const Profile = () => {
                 <p className="text-sm text-muted-foreground">Gerencie suas informações pessoais</p>
               </div>
             </div>
-            
-            {!isEditing && (
-              <Button variant="hero" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit2 className="h-4 w-4 mr-2" />
-                Editar Perfil
-              </Button>
-            )}
           </div>
         </div>
       </header>
@@ -163,135 +119,10 @@ const Profile = () => {
           </CardHeader>
         </Card>
 
-        {/* Informações Pessoais */}
-        <Card className="mb-8 bg-card/50 backdrop-blur-sm border-border/50">
-          <CardHeader>
-            <CardTitle>Informações Pessoais</CardTitle>
-            <CardDescription>Seus dados de contato e localização</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Nome Completo */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  <User className="h-4 w-4 inline mr-2" />
-                  Nome Completo
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editData.fullName}
-                    onChange={(e) => setEditData({ ...editData, fullName: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:border-primary"
-                  />
-                ) : (
-                  <p className="text-foreground font-medium">{profileData.fullName}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  <Mail className="h-4 w-4 inline mr-2" />
-                  Email
-                </label>
-                <p className="text-foreground font-medium">{profileData.email}</p>
-                <p className="text-xs text-muted-foreground mt-1">Não é possível alterar o email</p>
-              </div>
-
-              {/* Telefone */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  <Phone className="h-4 w-4 inline mr-2" />
-                  Telefone
-                </label>
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    value={editData.phone}
-                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:border-primary"
-                  />
-                ) : (
-                  <p className="text-foreground font-medium">{profileData.phone}</p>
-                )}
-              </div>
-
-              {/* Data de Nascimento */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  <Calendar className="h-4 w-4 inline mr-2" />
-                  Data de Nascimento
-                </label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    value={editData.birthDate}
-                    onChange={(e) => setEditData({ ...editData, birthDate: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:border-primary"
-                  />
-                ) : (
-                  <p className="text-foreground font-medium">
-                    {new Date(profileData.birthDate).toLocaleDateString("pt-BR")}
-                  </p>
-                )}
-              </div>
-
-              {/* Cidade */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  <MapPin className="h-4 w-4 inline mr-2" />
-                  Cidade
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editData.city}
-                    onChange={(e) => setEditData({ ...editData, city: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:border-primary"
-                  />
-                ) : (
-                  <p className="text-foreground font-medium">{profileData.city}</p>
-                )}
-              </div>
-
-              {/* Estado */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  Estado
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editData.state}
-                    onChange={(e) => setEditData({ ...editData, state: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:border-primary"
-                    maxLength={2}
-                  />
-                ) : (
-                  <p className="text-foreground font-medium">{profileData.state}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                Bio
-              </label>
-              {isEditing ? (
-                <textarea
-                  value={editData.bio}
-                  onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg bg-background border border-border focus:outline-none focus:border-primary"
-                  rows={4}
-                />
-              ) : (
-                <p className="text-foreground">{profileData.bio}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Informações Pessoais Detalhadas (Novo Componente) */}
+        <div className="mb-8">
+          <ProfileDetails />
+        </div>
 
         {/* Informações de Assinatura */}
         <Card className="mb-8 bg-card/50 backdrop-blur-sm border-border/50">
@@ -316,20 +147,6 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Botões de Ação */}
-        {isEditing && (
-          <div className="flex gap-4 justify-end">
-            <Button variant="outline" onClick={handleCancel}>
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button variant="hero" onClick={handleSaveProfile} disabled={isSaving}>
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? "Salvando..." : "Salvar Alterações"}
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   )

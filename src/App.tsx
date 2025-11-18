@@ -23,6 +23,7 @@ import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
 import AboutPage from "./pages/AboutPage";
 import Profile from "./pages/Profile";
+import ProfileDetails from "./components/ProfileDetails";
 import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
