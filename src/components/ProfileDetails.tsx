@@ -115,7 +115,7 @@ const ProfileDetails = () => {
       const { error: pessoaError } = await supabase
         .from("project.dim_pessoa")
         .update({
-          dt_nascimento: data.birthDate || null,
+          dt_nascimento: data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : null,
           num_telefone: data.phone || null,
         })
         .eq("id_pessoa", idPessoa);

@@ -86,6 +86,67 @@ const Signup = () => {
       }
 
       if (authData.user) {
+        const user_id = authData.user.id;
+        const current_timestamp = new Date().toISOString();
+
+        // 1. Inserir na dim_pessoa
+        const { data: pessoaData, error: pessoaError } = await supabase
+          .from("project.dim_pessoa")
+          .insert({
+            des_nome: data.fullName,
+            des_email: data.email,
+            flg_tipo_pessoa: 'F', // F para pessoa física
+          })
+          .select("id_pessoa")
+          .single();
+
+        if (pessoaError) {
+          console.error("Error inserting into dim_pessoa:", pessoaError);
+          toast({ variant: "destructive", title: "Erro ao criar perfil", description: pessoaError.message });
+          return;
+        }
+
+        // 2. Inserir na dim_usuario (vinculando ao auth.user.id e id_pessoa)
+        const { error: usuarioError } = await supabase
+          .from("project.dim_usuario")
+          .insert({
+            des_login: data.email,
+            id_pessoa: pessoaData.id_pessoa,
+            user_uid: user_id,
+          });
+
+        if (usuarioError) {
+          console.error("Error inserting into dim_usuario:", usuarioError);
+          toast({ variant: "destructive", title: "Erro ao criar usuário", description: usuarioError.message });
+          return;
+        }
+
+        // 3. Inserir na dim_cliente
+        const { error: clienteError } = await supabase.from("project.dim_cliente").insert({
+          id_pessoa: pessoaData.id_pessoa,
+          flg_atleta: 'T',
+        });
+
+        if (clienteError) {
+          console.error("Error inserting into dim_cliente:", clienteError);
+          toast({ variant: "destructive", title: "Erro ao criar cliente", description: clienteError.message });
+          return;
+        }
+
+        // 4. Inserir na public.profiles para compatibilidade e plano default (free)
+        const { error: profileError } = await supabase.from("public.profiles").insert({
+          id: user_id,
+          full_name: data.fullName,
+          subscription_tier: 'free',
+          created_at: current_timestamp,
+        });
+
+        if (profileError) {
+          console.error("Error inserting into public.profiles:", profileError);
+          toast({ variant: "destructive", title: "Erro ao inicializar plano", description: profileError.message });
+          return;
+        }
+      }
         // 1. Inserir na dim_pessoa
         const { data: pessoaData, error: pessoaError } = await supabase
           .from("project.dim_pessoa")

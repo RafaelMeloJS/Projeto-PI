@@ -140,7 +140,7 @@ const Profile = () => {
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Membro Desde</p>
                 <p className="text-foreground font-medium">
-                  {new Date(profileData.joinDate).toLocaleDateString("pt-BR")}
+                  {profileData.joinDate ? new Date(profileData.joinDate).toLocaleDateString("pt-BR") : "N/A"}
                 </p>
               </div>
             </div>
