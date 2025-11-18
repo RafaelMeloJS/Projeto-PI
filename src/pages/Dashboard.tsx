@@ -59,13 +59,14 @@ const Dashboard = () => {
           .eq("id", session.user.id)
           .single()
 
-        if (profileError) {
+        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 é "Row not found"
           console.error(profileError)
-          // toast({
-          //   title: "Erro ao carregar plano",
-          //   description: "Não foi possível buscar as informações da sua assinatura.",
-          //   variant: "destructive",
-          // })
+          toast({
+            title: "Erro ao carregar plano",
+            description: "Não foi possível buscar as informações da sua assinatura.",
+            variant: "destructive",
+          })
+          setSubscriptionTier("free") // Garante que o plano seja 'free' em caso de erro
         } else {
           setSubscriptionTier((profile?.subscription_tier as "free" | "premium") || "free")
         }

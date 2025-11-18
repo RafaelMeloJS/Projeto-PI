@@ -14,6 +14,12 @@ import { Loader2, Calendar, Phone, MapPin, User, Mail } from "lucide-react";
 const profileDetailsSchema = z.object({
   birthDate: z.string().optional(),
   phone: z.string().optional(),
+  maritalStatus: z.string().optional(),
+  nationality: z.string().optional(),
+  gender: z.string().optional(),
+  weight: z.number().optional().or(z.literal("")).transform(v => v === "" ? undefined : v),
+  bodyFat: z.number().optional().or(z.literal("")).transform(v => v === "" ? undefined : v),
+  measurementDate: z.string().optional(),
   address: z.string().optional(),
   zipCode: z.string().optional(),
   city: z.string().optional(),
@@ -63,11 +69,22 @@ const ProfileDetails = () => {
         // 2. Buscar dados da dim_pessoa
         const { data: pessoaData, error: pessoaError } = await supabase
           .from("project.dim_pessoa")
-          .select("dt_nascimento, num_telefone")
+          .select("dt_nascimento, num_telefone, des_estado_civil, des_nacionalidade, des_genero")
           .eq("id_pessoa", usuarioData.id_pessoa)
           .single();
 
-        // 3. Buscar dados de logradouro (se existir)
+        // 3. Buscar dados de biopedância (se existir)
+        const { data: biopedanciaData, error: biopedanciaError } = await supabase
+          .from("project.dim_biopedancia_pessoa")
+          .select("id_biopedancia_pessoa, num_peso, num_percentual_gordura, dt_medicao")
+          .eq("id_pessoa", usuarioData.id_pessoa)
+          .order("dt_medicao", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (biopedanciaError) console.error("Erro ao buscar dim_biopedancia_pessoa:", biopedanciaError);
+
+        // 4. Buscar dados de logradouro (se existir)
         const { data: logradouroData, error: logradouroError } = await supabase
           .from("project.dim_logradouro")
           .select("id_logradouro, des_logradouro, num_cep, des_cidade, des_estado, des_pais")
@@ -84,6 +101,12 @@ const ProfileDetails = () => {
         reset({
           birthDate: pessoaData?.dt_nascimento || "",
           phone: pessoaData?.num_telefone || "",
+          maritalStatus: pessoaData?.des_estado_civil || "",
+          nationality: pessoaData?.des_nacionalidade || "",
+          gender: pessoaData?.des_genero || "",
+          weight: biopedanciaData?.num_peso || undefined,
+          bodyFat: biopedanciaData?.num_percentual_gordura || undefined,
+          measurementDate: biopedanciaData?.dt_medicao || "",
           address: logradouroData?.des_logradouro || "",
           zipCode: logradouroData?.num_cep || "",
           city: logradouroData?.des_cidade || "",
@@ -117,12 +140,29 @@ const ProfileDetails = () => {
         .update({
           dt_nascimento: data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : null,
           num_telefone: data.phone || null,
+          des_estado_civil: data.maritalStatus || null,
+          des_nacionalidade: data.nationality || null,
+          des_genero: data.gender || null,
         })
         .eq("id_pessoa", idPessoa);
 
       if (pessoaError) throw pessoaError;
 
-      // 2. Inserir/Atualizar dim_logradouro
+      // 2. Inserir na dim_biopedancia_pessoa (sempre insere um novo registro)
+      if (data.weight || data.bodyFat) {
+        const { error: biopedanciaError } = await supabase
+          .from("project.dim_biopedancia_pessoa")
+          .insert({
+            id_pessoa: idPessoa,
+            num_peso: data.weight || null,
+            num_percentual_gordura: data.bodyFat || null,
+            dt_medicao: data.measurementDate || new Date().toISOString().split('T')[0],
+          });
+
+        if (biopedanciaError) throw biopedanciaError;
+      }
+
+      // 3. Inserir/Atualizar dim_logradouro
       const logradouroPayload = {
         des_logradouro: data.address || null,
         num_cep: data.zipCode || null,
@@ -225,11 +265,86 @@ const ProfileDetails = () => {
                 <p className="text-sm text-destructive">{errors.phone.message}</p>
               )}
             </div>
+
+            {/* Estado Civil */}
+            <div className="space-y-2">
+              <Label htmlFor="maritalStatus">Estado Civil</Label>
+              <Input
+                id="maritalStatus"
+                placeholder="Solteiro(a), Casado(a), etc."
+                {...register("maritalStatus")}
+              />
+            </div>
+
+            {/* Nacionalidade */}
+            <div className="space-y-2">
+              <Label htmlFor="nationality">Nacionalidade</Label>
+              <Input
+                id="nationality"
+                placeholder="Brasileira"
+                {...register("nationality")}
+              />
+            </div>
+
+            {/* Gênero */}
+            <div className="space-y-2">
+              <Label htmlFor="gender">Gênero</Label>
+              <Input
+                id="gender"
+                placeholder="Masculino, Feminino, Outro"
+                {...register("gender")}
+              />
+            </div>
           </div>
 
-          <div className="border-t border-border pt-6 space-y-6">
-            <h3 className="text-lg font-semibold text-foreground">Endereço</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+	          <div className="border-t border-border pt-6 space-y-6">
+	            <h3 className="text-lg font-semibold text-foreground">Dados de Biopedância (Opcional)</h3>
+	            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+	              {/* Peso */}
+	              <div className="space-y-2">
+	                <Label htmlFor="weight">Peso (kg)</Label>
+	                <Input
+	                  id="weight"
+	                  type="number"
+	                  step="0.1"
+	                  placeholder="Ex: 75.5"
+	                  {...register("weight", { valueAsNumber: true })}
+	                />
+	                {errors.weight && (
+	                  <p className="text-sm text-destructive">{errors.weight.message}</p>
+	                )}
+	              </div>
+
+	              {/* % de Gordura */}
+	              <div className="space-y-2">
+	                <Label htmlFor="bodyFat">% de Gordura</Label>
+	                <Input
+	                  id="bodyFat"
+	                  type="number"
+	                  step="0.1"
+	                  placeholder="Ex: 15.2"
+	                  {...register("bodyFat", { valueAsNumber: true })}
+	                />
+	                {errors.bodyFat && (
+	                  <p className="text-sm text-destructive">{errors.bodyFat.message}</p>
+	                )}
+	              </div>
+
+	              {/* Data da Medição */}
+	              <div className="space-y-2">
+	                <Label htmlFor="measurementDate">Data da Medição</Label>
+	                <Input
+	                  id="measurementDate"
+	                  type="date"
+	                  {...register("measurementDate")}
+	                />
+	              </div>
+	            </div>
+	          </div>
+
+	          <div className="border-t border-border pt-6 space-y-6">
+	            <h3 className="text-lg font-semibold text-foreground">Endereço</h3>
+	            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Endereço */}
               <div className="space-y-2">
                 <Label htmlFor="address" className="flex items-center">

@@ -37,18 +37,28 @@ const Profile = () => {
               .single()
 
             // 2. Buscar dados do perfil (profiles) para o plano (mantendo a compatibilidade)
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
               .from("public.profiles")
               .select("subscription_tier, created_at")
               .eq("id", session.user.id)
               .single()
 
+            let subscriptionTier: "premium" | "free" = "free";
+            let joinDate = session.user.created_at;
+
+            if (profileError && profileError.code !== 'PGRST116') { // Ignora "Row not found"
+              console.error("Erro ao buscar profile:", profileError);
+            } else if (profile) {
+              subscriptionTier = (profile.subscription_tier as "premium" | "free") || "free";
+              joinDate = profile.created_at || session.user.created_at;
+            }
+
             setProfileData(prev => ({
               ...prev,
               fullName: pessoaData?.des_nome || "Nome não encontrado",
               email: session.user.email || "Email não encontrado",
-              subscriptionTier: (profile?.subscription_tier as "premium" | "free") || "free",
-              joinDate: profile?.created_at || "2024-01-01",
+              subscriptionTier: subscriptionTier,
+              joinDate: joinDate,
             }))
           }
         }
