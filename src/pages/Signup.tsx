@@ -152,55 +152,7 @@ const Signup = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-    setIsLoading(true);
-    try {
-      const { error: signUpError, data: authData } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            full_name: data.fullName,
-          },
-        },
-      });
 
-      if (signUpError) {
-        if (signUpError.message.includes("already registered")) {
-          toast({
-            variant: "destructive",
-            title: "E-mail já cadastrado",
-            description: "Este e-mail já está em uso. Faça login ou use outro e-mail.",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Erro ao criar conta",
-            description: signUpError.message,
-          });
-        }
-        return;
-      }
-
-      
-
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Você está sendo redirecionado para o dashboard...",
-      });
-
-      navigate("/dashboard");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro inesperado",
-        description: "Ocorreu um erro ao criar sua conta. Tente novamente.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleGoogleSignup = async () => {
     try {
