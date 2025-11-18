@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Calendar, Phone, MapPin, User, Mail, Weight, Activity, Users, Globe } from "lucide-react";
+import { Loader2, Calendar, Phone, MapPin, User, Weight, Activity, Users, Globe } from "lucide-react";
+import { mockUserData } from "@/mocks/userData";
 
 // Definição do Schema de Validação
 const profileDetailsSchema = z.object({
@@ -28,12 +28,9 @@ const profileDetailsSchema = z.object({
 
 type ProfileDetailsForm = z.infer<typeof profileDetailsSchema>;
 
-const ProfileDetails = () => {
+const ProfileDetailsMock = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [idUsuario, setIdUsuario] = useState<number | null>(null);
-  const [idPessoa, setIdPessoa] = useState<number | null>(null);
-  const [idLogradouro, setIdLogradouro] = useState<number | null>(null);
 
   const {
     register,
@@ -46,69 +43,38 @@ const ProfileDetails = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      // Simular delay de carregamento
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        // Carregar dados mockados
+        const storedData = localStorage.getItem('mockUser');
+        const userData = storedData ? JSON.parse(storedData) : mockUserData;
 
-        // 1. Buscar id_usuario e id_pessoa
-        const { data: usuarioData, error: usuarioError } = await supabase
-          .from("project.dim_usuario")
-          .select("id_usuario, id_pessoa")
-          .eq("user_uid", user.id)
-          .single();
-
-        if (usuarioError || !usuarioData) {
-          console.error("Erro ao buscar dim_usuario:", usuarioError);
-          return;
-        }
-
-        setIdUsuario(usuarioData.id_usuario);
-        setIdPessoa(usuarioData.id_pessoa);
-
-        // 2. Buscar dados da dim_pessoa
-        const { data: pessoaData, error: pessoaError } = await supabase
-          .from("project.dim_pessoa")
-          .select("dt_nascimento, num_telefone, des_genero, des_estado_civil, des_nacionalidade, num_peso, num_percentual_gordura")
-          .eq("id_pessoa", usuarioData.id_pessoa)
-          .single();
-
-        // 3. Buscar dados de logradouro (se existir)
-        const { data: logradouroData, error: logradouroError } = await supabase
-          .from("project.dim_logradouro")
-          .select("id_logradouro, des_logradouro, num_cep, des_cidade, des_estado, des_pais")
-          .eq("id_pessoa", usuarioData.id_pessoa)
-          .maybeSingle();
-
-        if (logradouroError) console.error("Erro ao buscar dim_logradouro:", logradouroError);
-
-        if (logradouroData) {
-          setIdLogradouro(logradouroData.id_logradouro);
-        }
-
-        // Preencher o formulário
+        // Preencher o formulário com dados mockados
         reset({
-          birthDate: pessoaData?.dt_nascimento || "",
-          phone: pessoaData?.num_telefone || "",
-          gender: pessoaData?.des_genero || "",
-          maritalStatus: pessoaData?.des_estado_civil || "",
-          nationality: pessoaData?.des_nacionalidade || "",
-          weight: pessoaData?.num_peso?.toString() || "",
-          bodyFatPercentage: pessoaData?.num_percentual_gordura?.toString() || "",
-          address: logradouroData?.des_logradouro || "",
-          zipCode: logradouroData?.num_cep || "",
-          city: logradouroData?.des_cidade || "",
-          state: logradouroData?.des_estado || "",
-          country: logradouroData?.des_pais || "",
+          birthDate: userData.personalDetails.birthDate || "",
+          phone: userData.personalDetails.phone || "",
+          gender: userData.personalDetails.gender || "",
+          maritalStatus: userData.personalDetails.maritalStatus || "",
+          nationality: userData.personalDetails.nationality || "",
+          weight: userData.healthData.weight?.toString() || "",
+          bodyFatPercentage: userData.healthData.bodyFatPercentage?.toString() || "",
+          address: userData.address.street || "",
+          zipCode: userData.address.zipCode || "",
+          city: userData.address.city || "",
+          state: userData.address.state || "",
+          country: userData.address.country || "",
         });
 
+        setIsLoading(false);
       } catch (error) {
-        console.error("Erro geral ao carregar dados:", error);
+        console.error("Erro ao carregar dados mockados:", error);
         toast({
           variant: "destructive",
           title: "Erro de carregamento",
           description: "Não foi possível carregar seus dados de perfil.",
         });
-      } finally {
         setIsLoading(false);
       }
     };
@@ -118,58 +84,42 @@ const ProfileDetails = () => {
 
   const onSubmit = async (data: ProfileDetailsForm) => {
     setIsSaving(true);
+    
+    // Simular delay de salvamento
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     try {
-      if (!idPessoa) throw new Error("ID da Pessoa não encontrado.");
+      // Atualizar dados mockados no localStorage
+      const storedData = localStorage.getItem('mockUser');
+      const userData = storedData ? JSON.parse(storedData) : mockUserData;
 
-      // 1. Atualizar dim_pessoa
-      const { error: pessoaError } = await supabase
-        .from("project.dim_pessoa")
-        .update({
-          dt_nascimento: data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : null,
-          num_telefone: data.phone || null,
-          des_genero: data.gender || null,
-          des_estado_civil: data.maritalStatus || null,
-          des_nacionalidade: data.nationality || null,
-          num_peso: data.weight ? parseFloat(data.weight) : null,
-          num_percentual_gordura: data.bodyFatPercentage ? parseFloat(data.bodyFatPercentage) : null,
-        })
-        .eq("id_pessoa", idPessoa);
-
-      if (pessoaError) throw pessoaError;
-
-      // 2. Inserir/Atualizar dim_logradouro
-      const logradouroPayload = {
-        des_logradouro: data.address || null,
-        num_cep: data.zipCode || null,
-        des_cidade: data.city || null,
-        des_estado: data.state || null,
-        des_pais: data.country || null,
-        des_tipo_endereco: "Residencial", // Valor padrão
-        id_pessoa: idPessoa,
+      const updatedUserData = {
+        ...userData,
+        personalDetails: {
+          birthDate: data.birthDate || "",
+          phone: data.phone || "",
+          gender: data.gender || "",
+          maritalStatus: data.maritalStatus || "",
+          nationality: data.nationality || "",
+        },
+        healthData: {
+          ...userData.healthData,
+          weight: data.weight ? parseFloat(data.weight) : 0,
+          bodyFatPercentage: data.bodyFatPercentage ? parseFloat(data.bodyFatPercentage) : 0,
+        },
+        address: {
+          street: data.address || "",
+          zipCode: data.zipCode || "",
+          city: data.city || "",
+          state: data.state || "",
+          country: data.country || "",
+        },
       };
 
-      if (idLogradouro) {
-        // Atualizar
-        const { error: logradouroError } = await supabase
-          .from("project.dim_logradouro")
-          .update(logradouroPayload)
-          .eq("id_logradouro", idLogradouro);
-        
-        if (logradouroError) throw logradouroError;
-      } else {
-        // Inserir
-        const { data: newLogradouro, error: logradouroError } = await supabase
-          .from("project.dim_logradouro")
-          .insert(logradouroPayload)
-          .select("id_logradouro")
-          .single();
-
-        if (logradouroError) throw logradouroError;
-        setIdLogradouro(newLogradouro.id_logradouro);
-      }
+      localStorage.setItem('mockUser', JSON.stringify(updatedUserData));
 
       toast({
-        title: "Sucesso!",
+        title: "Sucesso! (MODO MOCK)",
         description: "Detalhes do perfil atualizados com sucesso.",
       });
 
@@ -202,6 +152,9 @@ const ProfileDetails = () => {
         <CardTitle className="flex items-center">
           <User className="h-5 w-5 mr-2" />
           Detalhes Pessoais e Endereço
+          <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-2 py-1 rounded">
+            MOCK
+          </span>
         </CardTitle>
         <CardDescription>Complete seu perfil para um acompanhamento mais preciso.</CardDescription>
       </CardHeader>
@@ -421,7 +374,7 @@ const ProfileDetails = () => {
                 Salvando...
               </>
             ) : (
-              "Salvar Detalhes do Perfil"
+              "Salvar Detalhes do Perfil (Mock)"
             )}
           </Button>
         </form>
@@ -430,4 +383,4 @@ const ProfileDetails = () => {
   );
 };
 
-export default ProfileDetails;
+export default ProfileDetailsMock;
