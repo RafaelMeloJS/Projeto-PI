@@ -61,11 +61,11 @@ const Dashboard = () => {
 
         if (profileError) {
           console.error(profileError)
-          toast({
-            title: "Erro ao carregar plano",
-            description: "Não foi possível buscar as informações da sua assinatura.",
-            variant: "destructive",
-          })
+          // toast({
+          //   title: "Erro ao carregar plano",
+          //   description: "Não foi possível buscar as informações da sua assinatura.",
+          //   variant: "destructive",
+          // })
         } else {
           setSubscriptionTier((profile?.subscription_tier as "free" | "premium") || "free")
         }
